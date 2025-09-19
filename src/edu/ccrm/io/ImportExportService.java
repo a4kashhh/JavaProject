@@ -7,6 +7,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.*;
 
+/**
+ * Service for importing and exporting data in CSV format.
+ * Handles reading student and course data from CSV files and 
+ * writing current system data to CSV files for backup or sharing.
+ * Uses Java NIO and Streams for efficient file processing.
+ */
 public class ImportExportService {
     private final DataStore ds = DataStore.getInstance();
 
@@ -17,11 +23,12 @@ public class ImportExportService {
                 String[] parts = line.split(",");
                 if(parts.length < 4) continue;
                 
-                String id = parts[0].trim();
-                String name = parts[2].trim();
-                String email = parts[3].trim();
+                String studentId = parts[0].trim();
+                // parts[1] contains registration number - not currently used in Student model
+                String fullName = parts[2].trim();
+                String emailAddress = parts[3].trim();
                 
-                ds.getStudents().put(id, new Student(id, name, email));
+                ds.getStudents().put(studentId, new Student(studentId, fullName, emailAddress));
             }
         }
     }
@@ -33,38 +40,35 @@ public class ImportExportService {
                 String[] parts = line.split(",");
                 if(parts.length < 6) continue;
                 
-                String code = parts[0].trim();
-                String title = parts[1].trim();
-                int credits = Integer.parseInt(parts[2].trim());
-                String instructor = parts[3].trim();
-                Semester sem = Semester.valueOf(parts[4].trim());
-                String dept = parts[5].trim();
+                String courseCode = parts[0].trim();
+                String courseTitle = parts[1].trim();
+                int creditHours = Integer.parseInt(parts[2].trim());
+                String instructorName = parts[3].trim();
+                Semester semester = Semester.valueOf(parts[4].trim());
+                String department = parts[5].trim();
                 
-                Course c = new Course.Builder(code)
-                    .title(title)
-                    .credits(credits)
-                    .instructor(instructor)
-                    .semester(sem)
-                    .department(dept)
+                Course course = new Course.Builder(courseCode)
+                    .title(courseTitle)
+                    .credits(creditHours)
+                    .instructor(instructorName)
+                    .semester(semester)
+                    .department(department)
                     .build();
                     
-                ds.getCourses().put(code, c);
+                ds.getCourses().put(courseCode, course);
             }
         }
     }
 
     public void exportAll(Path outDir) throws IOException {
         Files.createDirectories(outDir);
-        Path studentsFile = outDir.resolve("students_export.csv");
-        try(Stream<String> lines = ds.getStudents().values().stream()
-            .map(s -> String.join(",", s.getId(), s.getFullName(), s.getEmail(), String.valueOf(s.getStatus())))){
-            Files.write(studentsFile, (Iterable<String>)lines::iterator);
+        Path s = outDir.resolve("students_export.csv");
+        try(Stream<String> lines = ds.getStudents().values().stream().map(st -> String.join(",", st.getId(), st.getFullName(), st.getEmail(), String.valueOf(st.getStatus())))){
+            Files.write(s, (Iterable<String>)lines::iterator);
         }
-        Path coursesFile = outDir.resolve("courses_export.csv");
-        try(Stream<String> lines = ds.getCourses().values().stream()
-            .map(c -> String.join(",", c.getCode(), c.getTitle(), String.valueOf(c.getCredits()), 
-                c.getInstructor(), c.getSemester().toString(), c.getDepartment()))){
-            Files.write(coursesFile, (Iterable<String>)lines::iterator);
+        Path c = outDir.resolve("courses_export.csv");
+        try(Stream<String> lines = ds.getCourses().values().stream().map(co -> String.join(",", co.getCode(), co.getTitle(), String.valueOf(co.getCredits()), co.getInstructor(), co.getSemester().toString(), co.getDepartment()))){
+            Files.write(c, (Iterable<String>)lines::iterator);
         }
     }
 }

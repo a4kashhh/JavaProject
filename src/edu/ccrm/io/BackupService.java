@@ -7,32 +7,34 @@ import java.time.format.DateTimeFormatter;
 import edu.ccrm.util.RecursiveUtil;
 
 public class BackupService {
-    private final Path base;
+    private final Path baseBackupDirectory;
 
-    public BackupService(Path base){
-        this.base = base;
+    public BackupService(Path baseBackupDirectory){
+        this.baseBackupDirectory = baseBackupDirectory;
     }
 
     public Path backupDirectory(Path sourceDir) throws IOException {
-        String ts = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        Path target = base.resolve("backup_" + ts);
-        Files.createDirectories(target);
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        Path targetDirectory = baseBackupDirectory.resolve("backup_" + timestamp);
+        Files.createDirectories(targetDirectory);
         
-        Files.walk(sourceDir).forEach(p -> {
+        // Copy all files and directories recursively
+        Files.walk(sourceDir).forEach(sourcePath -> {
             try {
-                Path rel = sourceDir.relativize(p);
-                Path dest = target.resolve(rel);
-                if(Files.isDirectory(p)) {
-                    Files.createDirectories(dest);
+                Path relativePath = sourceDir.relativize(sourcePath);
+                Path destinationPath = targetDirectory.resolve(relativePath);
+                
+                if(Files.isDirectory(sourcePath)) {
+                    Files.createDirectories(destinationPath);
                 } else {
-                    Files.copy(p, dest);
+                    Files.copy(sourcePath, destinationPath);
                 }
             } catch(Exception e){ 
-                throw new RuntimeException(e); 
+                throw new RuntimeException("Failed to copy: " + sourcePath, e); 
             }
         });
         
-        return target;
+        return targetDirectory;
     }
 
     public long computeBackupSize(Path backupDir) throws IOException {

@@ -2,6 +2,12 @@ package edu.ccrm.domain;
 
 import java.util.Objects;
 
+/**
+ * Represents a course in the academic system.
+ * Uses the Builder pattern for flexible object construction and maintains
+ * immutability to ensure data integrity. Contains course details like
+ * code, title, credits, instructor, semester, and department.
+ */
 public class Course {
     private final String code;
     private final String title;
