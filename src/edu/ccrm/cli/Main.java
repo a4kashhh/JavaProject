@@ -8,9 +8,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
- * Main application class for the Campus Course & Records Management system.
- * Provides a simple command-line interface for managing students, courses, 
- * and enrollment data. This is the entry point for the application.
+ * Main CLI for CCRM application.
  */
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
@@ -20,11 +18,10 @@ public class Main {
     private static final ImportExportService ioService = new ImportExportService();
 
     public static void main(String[] args) {
-        // Initialize the system with some sample data
+        // Initialize with sample data
         ds.seedSample();
         
-        System.out.println("=== Welcome to Campus Course & Records Manager ===");
-        System.out.println("This system helps you manage student enrollment and course information.");
+        System.out.println("=== Campus Course & Records Manager ===");
         
         boolean continueRunning = true;
         while(continueRunning){
@@ -41,21 +38,21 @@ public class Main {
                     displayExitMessage(); 
                     continueRunning = false; 
                 }
-                default -> System.out.println("Sorry, that's not a valid option. Please try again.");
+                default -> System.out.println("Invalid option. Please try again.");
             }
         }
-        System.out.println("Thank you for using CCRM. Have a great day!");
+        System.out.println("Application terminated.");
     }
 
     private static void showMainMenu(){
-        System.out.println("\n=== What would you like to do? ===");
+        System.out.println("\n=== Main Menu ===");
         System.out.println("1) Manage Students");
         System.out.println("2) Manage Courses"); 
-        System.out.println("3) Enroll Student in Course");
-        System.out.println("4) Import/Export Data");
-        System.out.println("5) Backup System Data");
-        System.out.println("6) Exit Application");
-        System.out.print("\nPlease enter your choice (1-6): ");
+        System.out.println("3) Enroll Student");
+        System.out.println("4) Import/Export");
+        System.out.println("5) Backup");
+        System.out.println("6) Exit");
+        System.out.print("\nSelect option: ");
     }
 
     private static void handleStudentManagement(){
